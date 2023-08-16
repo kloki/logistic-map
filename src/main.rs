@@ -49,12 +49,12 @@ fn run(r: f64, init: f64, iterations: usize) -> Vec<(f64, f64)> {
     result
 }
 
-fn get_data_set(start: f64, end: f64, width: u32, density: usize) -> Vec<(f64, f64)> {
+fn get_data_set(start: f64, end: f64, steps: u32, density: usize) -> Vec<(f64, f64)> {
     let mut data_set: Vec<(f64, f64)> = vec![];
-    let step = (end - start) / width as f64;
+    let step = (end - start) / steps as f64;
     let mut r = start - step;
     let mut rng = thread_rng();
-    for _ in 0..width {
+    for _ in 0..steps {
         r = r + step;
         if r < 0.0 || r > 4.0 {
             break;
@@ -65,7 +65,7 @@ fn get_data_set(start: f64, end: f64, width: u32, density: usize) -> Vec<(f64, f
             data_set.push(*new_run.last().unwrap());
         } else if r < 3.0 {
             let mut new_run = run(r, rng.gen(), 400);
-            data_set.append(&mut new_run.drain(397..).collect::<Vec<_>>());
+            data_set.append(&mut new_run.drain(398..).collect::<Vec<_>>());
         } else {
             let mut new_run = run(r, rng.gen(), density * 2);
             data_set.append(&mut new_run.drain(density..).collect::<Vec<_>>());
@@ -89,7 +89,7 @@ fn graph(
     root.fill(&WHITE)?;
 
     let mut chart = ChartBuilder::on(&root)
-        .caption("Bifucation diagram", ("sans-serif", 20))
+        .caption("Logistic map", ("sans-serif", 20))
         .set_label_area_size(LabelAreaPosition::Left, 40)
         .set_label_area_size(LabelAreaPosition::Bottom, 40)
         .set_label_area_size(LabelAreaPosition::Right, 10)
@@ -97,6 +97,7 @@ fn graph(
 
     chart.configure_mesh().disable_mesh().x_desc("r").draw()?;
 
+    //base the amount of steps on the image width
     let data_set = get_data_set(start, end, width, density);
 
     chart
