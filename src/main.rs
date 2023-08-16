@@ -9,15 +9,21 @@ struct Args {
     start_x: f64,
     /// End value x-axis
     end_x: f64,
-    /// Start value x-axis
+    /// Start value y-axis
     start_y: f64,
     /// End value y-axis
     end_y: f64,
+    #[arg(long, default_value_t = 500)]
+    /// Determines the amount of data points rendered. Play with this on high zoom levels.
+    density: usize,
     #[arg(short, long, default_value = "./output.png")]
+    /// Name of png file
     output_file: String,
     #[arg(long, default_value_t = 1000)]
+    /// Width of png file in pixels.
     width: u32,
-    #[arg(long, default_value_t = 500)]
+    /// Height of png file in pixels.
+    #[arg(long, default_value_t = 800)]
     height: u32,
 }
 fn main() {
@@ -27,6 +33,7 @@ fn main() {
         args.end_x,
         args.start_y,
         args.end_y,
+        args.density,
         args.width,
         args.height,
         args.output_file,
@@ -42,7 +49,7 @@ fn run(r: f64, init: f64, iterations: usize) -> Vec<(f64, f64)> {
     result
 }
 
-fn get_data_set(start: f64, end: f64, width: u32) -> Vec<(f64, f64)> {
+fn get_data_set(start: f64, end: f64, width: u32, density: usize) -> Vec<(f64, f64)> {
     let mut data_set: Vec<(f64, f64)> = vec![];
     let step = (end - start) / width as f64;
     let mut r = start - step;
@@ -60,8 +67,8 @@ fn get_data_set(start: f64, end: f64, width: u32) -> Vec<(f64, f64)> {
             let mut new_run = run(r, rng.gen(), 400);
             data_set.append(&mut new_run.drain(397..).collect::<Vec<_>>());
         } else {
-            let mut new_run = run(r, rng.gen(), 800);
-            data_set.append(&mut new_run.drain(500..).collect::<Vec<_>>());
+            let mut new_run = run(r, rng.gen(), density * 2);
+            data_set.append(&mut new_run.drain(density..).collect::<Vec<_>>());
         }
     }
 
@@ -73,6 +80,7 @@ fn graph(
     end: f64,
     start_y: f64,
     end_y: f64,
+    density: usize,
     width: u32,
     height: u32,
     file_name: String,
@@ -89,7 +97,7 @@ fn graph(
 
     chart.configure_mesh().disable_mesh().x_desc("r").draw()?;
 
-    let data_set = get_data_set(start, end, width);
+    let data_set = get_data_set(start, end, width, density);
 
     chart
         .draw_series(
@@ -108,6 +116,6 @@ mod tests {
 
     #[test]
     fn test_basic() {
-        graph(0.0, 4.0, 0.0, 1.0, 100, 50, "test.png".to_string()).unwrap();
+        graph(0.0, 4.0, 0.0, 1.0, 500, 100, 50, "test.png".to_string()).unwrap();
     }
 }
