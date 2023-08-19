@@ -2,6 +2,8 @@
 
 https://en.wikipedia.org/wiki/Logistic_map
 
+![Example](./example.png)
+
 ```
 cargo build --release
 ./target/release/logistic_map --help
