@@ -86,7 +86,7 @@ fn graph(
     file_name: String,
 ) -> Result<(), Box<dyn Error>> {
     let root = BitMapBackend::new(&file_name, (width, height)).into_drawing_area();
-    root.fill(&WHITE)?;
+    root.fill(&RGBColor(40, 43, 54))?;
 
     let mut chart = ChartBuilder::on(&root)
         .caption("Logistic map", ("sans-serif", 20))
@@ -100,12 +100,14 @@ fn graph(
     //base the amount of steps on the image width
     let data_set = get_data_set(start, end, width, density);
 
+    let mut rng = thread_rng();
     chart
-        .draw_series(
-            data_set
-                .iter()
-                .map(|point| Pixel::new(*point, Into::<ShapeStyle>::into(&BLACK).filled())),
-        )
+        .draw_series(data_set.iter().map(|point| {
+            Pixel::new(
+                *point,
+                Into::<ShapeStyle>::into(&RGBColor(80, rng.gen_range(50..=250), 123)).filled(),
+            )
+        }))
         .unwrap();
 
     Ok(())
